@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="app">
+<head>
+    <meta charset="UTF-8"/>
+    <title></title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+    <script src="/resources/angular-websocket.js"></script>
+    <script>
+        var app = angular.module("app", ["ngWebSocket"])
+        app.factory('Chat', function($websocket) {
+            // Open a WebSocket connection
+            var dataStream = $websocket('ws://localhost:8080/chat');
+
+            var collection = [];
+
+            dataStream.onMessage(function(message) {
+                collection.push(JSON.parse(message.data));
+            });
+
+            var methods = {
+                collection: collection,
+                send: function (message) {
+                    dataStream.send(JSON.stringify({message:message}))
+                },
+                get: function() {
+                    dataStream.send(JSON.stringify({ action: 'get' }));
+                }
+            };
+
+            return methods;
+        }).controller("MainCtrl", function($scope, Chat){
+            $scope.message = {
+                message : ""
+            }
+            $scope.data = Chat.collection
+            $scope.submit = function () {
+                Chat.send($scope.message.message)
+            }
+        })
+    </script>
+</head>
+
+<body>
+<div class="container" ng-controller="MainCtrl">
+    <br/>
+    <div class="row">
+        <div class="col-lg-6">
+            <textarea id="message" class="form-control" ng-model="message.message">
+
+            </textarea>
+            <div class="btn-group">
+                <button class="btn btn-sm btn-primary" ng-click="submit()">Отправить</button>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <ul>
+                <li ng-repeat="item in data" ng-bind="item.message">
+
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+</body>
+</html>
