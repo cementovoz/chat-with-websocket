@@ -1,2 +1,2 @@
 # chat-with-websocket
-Simple demo with Sring, Angular, Websockets
+Simple demo with Spring, Angular, Websockets
